@@ -6,6 +6,7 @@ description = "A tool for generating brainfuck programs that apply stack effect 
 license = "GPL-3.0-or-later"
 license_file = "LICENSE"
 repository = "https://github.com/Alextopher/autoperm"
+keywords = ["brainfuck"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
