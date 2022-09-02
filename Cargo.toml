@@ -3,7 +3,7 @@ name = "autoperm"
 version = "0.1.4"
 edition = "2021"
 description = "A tool for generating brainfuck programs that apply stack effect diagrams"
-license = "GPL v3"
+license = "GPL-3.0-or-later"
 license_file = "LICENSE"
 repository = "https://github.com/Alextopher/autoperm"
 
