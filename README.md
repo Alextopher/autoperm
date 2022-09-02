@@ -4,7 +4,9 @@ autoperm is a tool for generating brainfuck programs that apply [stack effect di
 
 ## Install
 
-
+```test
+cargo install autoperm
+```
 
 ## Usage
 

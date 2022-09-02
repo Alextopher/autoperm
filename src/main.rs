@@ -22,8 +22,7 @@ fn main() {
                 Ok(_) => match auto_perm(&input) {
                     Ok(program) => println!("{}\n", program),
                     Err(e) => {
-                        eprintln!("{}", e);
-                        exit(1);
+                        eprintln!("{}\n", e);
                     }
                 },
                 Err(e) => {
