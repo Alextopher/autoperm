@@ -2,13 +2,17 @@
 
 autoperm is a tool for generating brainfuck programs that apply [stack effect diagrams](https://en.wikipedia.org/wiki/Stack-oriented_programming#Stack_effect_diagrams). 
 
-## Examples
+## Install
+
+
+
+## Usage
 
 ```bf
 $ autoperm a b -- b a
 [->+<]<[->+<]>>[-<<+>>]<
 
-$ autoperm 
+$ autoperm
 a b c -- c a b
 [->+<]<[->+<]<[->+<]>>>[-<<<+>>>]<
 
