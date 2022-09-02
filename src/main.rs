@@ -20,7 +20,7 @@ fn main() {
             let mut input: String = String::new();
             match std::io::stdin().read_line(&mut input) {
                 Ok(_) => match auto_perm(&input) {
-                    Ok(a) => println!("{}", a),
+                    Ok(program) => println!("{}\n", program),
                     Err(e) => {
                         eprintln!("{}", e);
                         exit(1);

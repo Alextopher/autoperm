@@ -8,20 +8,22 @@ autoperm is a tool for generating brainfuck programs that apply [stack effect di
 $ autoperm a b -- b a
 [->+<]<[->+<]>>[-<<+>>]<
 
-$ autoperm a b c -- c a b
+$ autoperm 
+a b c -- c a b
 [->+<]<[->+<]<[->+<]>>>[-<<<+>>>]<
 
-$ autoperm a -- a a a a
+a -- a a a a
 [->>>>+<<<<]>>>>[-<+<+<+<+>>>>]<
 
-$ autoperm a b c d -- d c a b
+a b c d -- d c a b
 [->+<]<<[->>+<<]>[-<+>]<<[->>+<<]>>>>[-<<<<+>>>>]<
 
-$ autoperm a b c -- c
+a b c -- c
 <<[-]>[-]>[-<<+>>]<<
 
-$ autoperm a b c d e f -- c d d f e e b
+a b c d e f -- c d d f e e b
 <<<<<[-]>[->>>>>+<<<<<]>[-<<+>>]>[-<+<+>>]>>[-<<+>>]<[->>>+<<<]>>>[-<<+<+>>>]<
+
 ```
 
 ## Constraints
