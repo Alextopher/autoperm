@@ -1,0 +1,16 @@
+[package]
+name = "autoperm"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+itertools = "0.10.3"
+petgraph = "0.6"
+
+[dev-dependencies]
+bfi = { git = "https://github.com/Alextopher/bfi.git", branch = "main" }
+rand = "0.8.5"
+quickcheck = "1"
+quickcheck_macros = "1"
