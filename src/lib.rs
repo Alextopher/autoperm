@@ -76,7 +76,12 @@ pub fn auto_perm(stack_effect: &str) -> Result<String, String> {
             ));
         }
     };
-    assert!(iter.next().is_none());
+
+    if iter.next().is_some() {
+        return Err(String::from(
+            "stack effect is wrong. it should look like 'a b -- a b a b`",
+        ));
+    }
 
     // map symbols to their input postitions
     let mut symbols_to_positions = HashMap::new();
