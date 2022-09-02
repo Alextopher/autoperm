@@ -1,7 +1,5 @@
 use bfi::TestResults;
 use quickcheck::TestResult;
-use rand::prelude::*;
-use std::collections::HashMap;
 
 fn multiple_test(code: &str, inputs: Vec<Vec<u8>>, outputs: Vec<Vec<u8>>) -> bool {
     assert!(inputs.len() == outputs.len());
@@ -37,6 +35,10 @@ fn multiple_test(code: &str, inputs: Vec<Vec<u8>>, outputs: Vec<Vec<u8>>) -> boo
 }
 
 fn test_perm(inputs: usize, perm: Vec<usize>) -> bool {
+    if !perm.is_empty() {
+        assert!(*perm.iter().max().unwrap() < inputs);
+    }
+
     let input = format!(
         "{} -- {}",
         (0..inputs)
@@ -47,6 +49,7 @@ fn test_perm(inputs: usize, perm: Vec<usize>) -> bool {
             .fold(String::new(), |a, b| format!("{} {}", a, b))
     );
     let outputs = perm.len();
+    println!("{}", input);
 
     let reads: String = ">,".repeat(inputs);
     let writes: String = ".<".repeat(outputs);
@@ -90,17 +93,15 @@ fn serotonin() {
     test_perm(4, vec![2, 3, 0, 1, 2, 3]);
 }
 
+/// it would be embarrassing if the README examples didn't work
 #[test]
-fn manual() {
-    test_perm(
-        253,
-        vec![
-            0, 0, 2, 2, 4, 4, 0, 0, 0, 0, 0, 0, 3, 5, 6, 8, 9, 10, 7, 0, 11, 12, 49, 15, 13, 16, 0,
-            17, 18, 19, 0, 20, 21, 23, 26, 24, 27, 30, 28, 22, 40, 0, 31, 0, 0, 40, 32, 34, 0, 39,
-            35, 36, 37, 41, 14, 42, 38, 0, 29, 43, 44, 0, 33, 45, 46, 0, 47, 48, 50, 1, 51, 52, 53,
-            74, 73, 54, 55, 25, 56, 80, 79, 57, 58,
-        ],
-    );
+fn readme() {
+    test_perm(2, vec![1, 0]);
+    test_perm(3, vec![2, 0, 1]);
+    test_perm(1, vec![0, 0, 0, 0]);
+    test_perm(4, vec![3, 2, 0, 1]);
+    test_perm(3, vec![2]);
+    test_perm(6, vec![2, 3, 3, 5, 4, 4, 1]);
 }
 
 #[quickcheck]
