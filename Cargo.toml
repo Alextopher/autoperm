@@ -1,18 +1,18 @@
 [package]
 name = "autoperm"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2021"
 description = "A tool for generating brainfuck programs that apply stack effect diagrams"
 license = "GPL-3.0-or-later"
-license_file = "LICENSE"
 repository = "https://github.com/Alextopher/autoperm"
 keywords = ["brainfuck"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[features]
+bin = ["clap"]
 
 [dependencies]
-clap = { version = "3.2.20", features = ["derive"], optional = true }
-itertools = "0.10.3"
+clap = { version = "3.2", features = ["derive"], optional = true }
+itertools = "0.10"
 petgraph = "0.6"
 
 [dev-dependencies]
@@ -22,4 +22,4 @@ quickcheck_macros = "1"
 
 [[bin]]
 name = "autoperm"
-required_features = ["dep:clap"]
+required-features = ["clap"]
