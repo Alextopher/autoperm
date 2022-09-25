@@ -4,7 +4,7 @@ use quickcheck::TestResult;
 fn multiple_test(code: &str, inputs: Vec<Vec<u8>>, outputs: Vec<Vec<u8>>) -> bool {
     assert!(inputs.len() == outputs.len());
 
-    match bfi::tests_blocking(code, inputs.into_iter(), outputs.into_iter(), 1000) {
+    match bfi::tests_blocking(code, inputs.into_iter(), outputs.into_iter(), 10000) {
         TestResults::OutputsDontMatchInputs => false,
         TestResults::ParseError(err) => {
             eprintln!("{:?}", err);
