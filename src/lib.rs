@@ -89,7 +89,7 @@ pub fn auto_perm(stack_effect: &str) -> Result<String, String> {
         // each symbol must only appear once in the input
         if let Some(pos) = symbols_to_positions.get(symbol) {
             return Err(format!(
-                "symbol {} is defined twice. At postition {} and {}",
+                "symbol {} is defined twice. At position {} and {}",
                 symbol, i, pos
             ));
         } else {
@@ -124,7 +124,7 @@ pub fn auto_perm(stack_effect: &str) -> Result<String, String> {
         })
     }
 
-    // Reversing the ouput of tarjan's strongly connected components creates the program
+    // Reversing the output of tarjan's strongly connected components creates the program
     let tarjan = petgraph::algo::tarjan_scc(&digraph);
 
     let mut instructions = vec![];
