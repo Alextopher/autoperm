@@ -1,6 +1,6 @@
 # autoperm
 
-autoperm is a tool for generating brainfuck programs that apply [stack effect diagrams](https://en.wikipedia.org/wiki/Stack-oriented_programming#Stack_effect_diagrams). 
+autoperm is a tool for generating brainfuck programs that apply [stack effect diagrams](https://en.wikipedia.org/wiki/Stack-oriented_programming#Stack_effect_diagrams). The produced result has the fewest number of _loops_ and it's foundation is [Tarjan's Strongly Connected Components Algorithm](https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm). 
 
 ## Install
 
@@ -32,9 +32,11 @@ a b c d e f -- c d d f e e b
 
 ```
 
+There are also oppertunities to use the project as a library. This is currently **unstable** and is a work in progress.
+
 ## Constraints
 
-The program assumes the memory pointers is pointing at the top of the stack. Any new cells should start empty and there must be 1 free cell at the top of the stack for temporary storage.
+The program assumes that memory pointers are pointing at the top of the stack. Any new cells should start empty and there must be 1 free cell at the top of the stack for temporary storage.
 
 For example walking through (a b -- a b a b)
 ```bf
