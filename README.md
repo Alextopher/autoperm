@@ -2,7 +2,7 @@
 
 autoperm is a tool for generating brainfuck programs that apply [stack effect diagrams](https://en.wikipedia.org/wiki/Stack-oriented_programming#Stack_effect_diagrams). The produced result has the fewest number of _loops_ and it's foundation is [Tarjan's Strongly Connected Components Algorithm](https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm). 
 
-Eventually I will add more polish but here is a quick [explanation](./explanation.md) I wrote about this problem.
+Eventually I will create a proper write up but for now here is my quick [explanation](./explanation.md).
 
 ## Install
 
