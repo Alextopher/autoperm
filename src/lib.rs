@@ -1,199 +1,163 @@
-use std::{cmp::Ordering, collections::HashMap};
+//! Autoperm is a tool for generating programs to apply stack effect diagrams.
+//!
+//! It is backend agnostic and could be used to generate programs for any language as long
+//! as the language implements the [`Model`](model::Model) trait.
+//! 
+//! A [brainfuck](https://en.wikipedia.org/wiki/Brainfuck) backend is provided and accessible
+//! with [`autoperm_bf`](crate::autoperm_bf`).
+//! 
+//! ## Binary
+//! 
+//! Installing the crate as a binary gives access to the `autoperm` command which uses this brainfuck backend as REPL.
+//! 
+//! ```test
+//! cargo install autoperm
+//! ```
+//! 
+//! **Usage:**
+//! 
+//! ```bf
+//! $ autoperm a b -- b a
+//! [->+<]<[->+<]>>[-<<+>>]<
+//! 
+//! $ autoperm
+//! a b c -- c a b
+//! [->+<]<[->+<]<[->+<]>>>[-<<<+>>>]<
+//! 
+//! a -- a a a a
+//! [->>>>+<<<<]>>>>[-<+<+<+<+>>>>]<
+//! 
+//! a b c d -- d c a b
+//! [->+<]<<[->>+<<]>[-<+>]<<[->>+<<]>>>>[-<<<<+>>>>]<
+//! 
+//! a b c -- c
+//! <<[-]>[-]>[-<<+>>]<<
+//! 
+//! a b c d e f -- c d d f e e b
+//! <<<<<[-]>[->>>>>+<<<<<]>[-<<+>>]>[-<+<+>>]>>[-<<+>>]<[->>>+<<<]>>>[-<<+<+>>>]<
+//! 
+//! ```
+//! 
+//! The program assumes the memory pointer starts by pointing at the top of the stack. 
+//! Any "new" cells (cells that are not defined in the input) should start empty. 
+//! There must also be 1 free cell at the top of the stack for temporary storage.
+//! 
+//! For example: 
+//! ```bf
+//! (a b c -- c)
+//! start must be:
+//!   a  b *c  0 // a and b are cleared
+//! <<[-]>[-]>[-<<+>>]<<
+//! end:
+//!  *c  0  0  0
+//! 
+//! (a -- a a a a)
+//! start must be:
+//!   a  0  0  0  0 // note: no 0s are initialized before usage
+//! [->>>>+<<<<]>>>>[-<+<+<+<+>>>>]<
+//! end:
+//!   a  a  a *a  0
+//! ```
+//! 
+//! A walk through for (a b -- a b a b)
+//! 
+//! ```bf
+//! a b -- a b a b
+//! <[->>>>+<<<<]>>>>[-<<+<<+>>>>]<<<[->>>+<<<]>>>[-<+<<+>>>]<
+//! 
+//! # the tape
+//!  0 *1  2  3  T 
+//!  a  b  0  0  0
+//! 
+//! <[->>>>+<<<<]      0 → {T}
+//! *0  1  2  3  T 
+//!  0  b  0  0  a
+//! 
+//! >>>>[-<<+<<+>>>>]  T → {2 0}
+//!  0  1  2  3 *T 
+//!  a  b  a  0  0
+//! 
+//! <<<[->>>+<<<]      1 → {T}
+//!  0 *1  2  3  T 
+//!  a  0  a  0  b
+//! 
+//! >>>[-<+<<+>>>]     T → {1 3}
+//!  0  1  2  3 *T 
+//!  a  b  a  b  0
+//! 
+//! < 
+//!  0  1  2 *3  T 
+//!  a  b  a  b  0
+//! ``` 
+#![warn(missing_docs)]
 
-use petgraph::prelude::*;
+mod model;
+mod parse;
+mod solve;
+use models::Brainfuck;
 
-#[derive(Debug)]
-pub enum Instruction {
-    Clear(isize),
-    Mov(isize, Vec<isize>),
+pub mod models;
+pub use model::Model;
+pub use parse::{parse, ParseError, StackEffectDiagram};
+pub use solve::{solve, Instruction};
+
+/// Generate a brainfuck program that applies a given [`StackEffectDiagram`](crate::StackEffectDiagram)
+///
+/// # Examples
+///
+/// ```
+/// use autoperm::autoperm_bf;
+///
+/// let program = autoperm_bf("a b -- b a");
+///
+/// assert_eq!(program, Ok(">[->+<]<[->+<]>>[-<<+>>]<<".to_string()));
+/// ```
+pub fn autoperm_bf(stack_effect: &str) -> Result<String, ParseError> {
+    autoperm(stack_effect, Brainfuck::new())
 }
 
-impl Instruction {
-    pub fn ptr(&self) -> isize {
-        match self {
-            Instruction::Clear(i) => *i,
-            Instruction::Mov(i, _) => *i,
-        }
-    }
-}
-
-impl std::fmt::Display for Instruction {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Instruction::Clear(_) => write!(f, "[-]")?,
-            Instruction::Mov(i, moves) => {
-                write!(f, "[-")?;
-
-                let mut ptr = i;
-                for m in moves {
-                    let diff = m - ptr;
-                    write!(
-                        f,
-                        "{}+",
-                        match diff.cmp(&0) {
-                            Ordering::Less => "<".repeat(diff.unsigned_abs()),
-                            Ordering::Equal => String::new(),
-                            Ordering::Greater => ">".repeat(diff.unsigned_abs()),
-                        }
-                    )?;
-                    ptr = m
-                }
-
-                let diff = i - ptr;
-                write!(
-                    f,
-                    "{}",
-                    match diff.cmp(&0) {
-                        Ordering::Less => "<".repeat(diff.unsigned_abs()),
-                        Ordering::Equal => String::new(),
-                        Ordering::Greater => ">".repeat(diff.unsigned_abs()),
-                    }
-                )?;
-
-                write!(f, "]")?;
-            }
-        }
-
-        Ok(())
-    }
-}
-
-pub fn auto_perm(stack_effect: &str) -> Result<String, String> {
-    let mut iter = stack_effect.split("--");
-    let pops = match iter.next() {
-        Some(p) => p,
-        None => {
-            return Err(String::from(
-                "stack effect is wrong. it should look like 'a b -- a b a b`",
-            ));
-        }
-    };
-    let pushes = match iter.next() {
-        Some(p) => p,
-        None => {
-            return Err(String::from(
-                "stack effect is wrong. it should look like 'a b -- a b a b`",
-            ));
-        }
-    };
-
-    if iter.next().is_some() {
-        return Err(String::from(
-            "stack effect is wrong. it should look like 'a b -- a b a b`",
-        ));
-    }
-
-    // map symbols to their input postitions
-    let mut symbols_to_positions = HashMap::new();
-    for (i, symbol) in (0..).zip(pops.split_whitespace()) {
-        // each symbol must only appear once in the input
-        if let Some(pos) = symbols_to_positions.get(symbol) {
-            return Err(format!(
-                "symbol {} is defined twice. At position {} and {}",
-                symbol, i, pos
-            ));
-        } else {
-            symbols_to_positions.insert(symbol, i);
-        }
-    }
-    let input_size = symbols_to_positions.len() as isize;
-
-    // the mapping of results to inputs is a function
-    // ie:
-    let mut mapping = vec![];
-    for symbol in pushes.split_whitespace() {
-        if let Some(pos) = symbols_to_positions.get(symbol) {
-            mapping.push(*pos);
-        } else {
-            return Err(format!("symbol {} in the output is not defined", symbol));
-        }
-    }
-    let output_size = mapping.len() as isize;
-
-    // The index of the temporary variable. Place it above the last item
-    let temp = mapping.len() as isize;
-
-    let edges: Vec<_> = mapping.iter().enumerate().map(|(i, j)| (*j, i)).collect();
-
-    let mut digraph: DiGraph<(), (), usize> = DiGraph::from_edges(edges);
-
-    // if the number of outputs is less than the number of inputs those nodes need to be cleared
-    if mapping.len() < symbols_to_positions.len() {
-        (mapping.len()..symbols_to_positions.len()).for_each(|_| {
-            digraph.add_node(());
-        })
-    }
-
-    // Reversing the output of tarjan's strongly connected components creates the program
-    let tarjan = petgraph::algo::tarjan_scc(&digraph);
-
-    let mut instructions = vec![];
-
-    for component in tarjan {
-        if component.len() == 1 {
-            // get the neighbors as a usize
-            let neighbors = get_neighbors(&digraph, component[0]);
-            let index = component[0].index() as isize;
-
-            if neighbors.is_empty() {
-                if index < input_size {
-                    instructions.push(Instruction::Clear(index as isize));
-                }
-            } else if neighbors.contains(&index) {
-                if neighbors.len() > 1 {
-                    instructions.push(Instruction::Mov(index, vec![temp]));
-                    instructions.push(Instruction::Mov(temp, neighbors));
-                }
-            } else {
-                instructions.push(Instruction::Mov(index, neighbors));
-            }
-        } else {
-            let mut iter = component.into_iter();
-
-            let last_index = iter.next().unwrap();
-            let last_neighbors = get_neighbors(&digraph, last_index);
-
-            instructions.push(Instruction::Mov(last_index.index() as isize, vec![temp]));
-
-            for node in iter {
-                let neighbors = get_neighbors(&digraph, node);
-                instructions.push(Instruction::Mov(node.index() as isize, neighbors));
-            }
-
-            instructions.push(Instruction::Mov(temp, last_neighbors));
-        }
-    }
-
-    let mut result = String::new();
-    let mut ptr = (input_size - 1) as isize;
-    for i in instructions {
-        let diff = i.ptr() - ptr;
-        result += &match diff.cmp(&0) {
-            Ordering::Less => "<".repeat(diff.unsigned_abs()),
-            Ordering::Equal => String::new(),
-            Ordering::Greater => ">".repeat(diff.unsigned_abs()),
-        };
-
-        result = format!("{}{}", result, i);
-        ptr = i.ptr();
-    }
-
-    let diff = output_size - ptr - 1;
-    result += &match diff.cmp(&0) {
-        Ordering::Less => "<".repeat(diff.unsigned_abs()),
-        Ordering::Equal => String::new(),
-        Ordering::Greater => ">".repeat(diff.unsigned_abs()),
-    };
-
-    Ok(result)
-}
-
-fn get_neighbors<N, E, Ty, Ix>(graph: &Graph<N, E, Ty, Ix>, index: NodeIndex<Ix>) -> Vec<isize>
+/// Generate a program to apply a given [`StackEffectDiagram`](crate::StackEffectDiagram).
+///
+/// This function is backend agnostic and can be used to generate programs for any language.
+///
+/// See: [`Model`](crate::Model).
+/// 
+/// # Examples
+///
+/// ```
+/// use autoperm::autoperm;
+/// use autoperm::models::Brainfuck;
+///
+/// let model = Brainfuck::new();
+/// let program = autoperm("a b -- b a", model);
+///
+/// assert_eq!(program, Ok(">[->+<]<[->+<]>>[-<<+>>]<<".to_string()));
+/// ```
+pub fn autoperm<M>(stack_effect: &str, model: M) -> Result<M::Output, ParseError>
 where
-    Ty: petgraph::EdgeType,
-    Ix: petgraph::adj::IndexType,
+    M: Model,
 {
-    graph.neighbors(index).map(|i| i.index() as isize).collect()
+    let diagram = parse(stack_effect)?;
+
+    let instructions = solve(&diagram);
+
+    // For each instruction send it to the backend to generate the program
+    Ok(generate(instructions, model))
+}
+
+/// Generate a program from a list of [`Instruction`](crate::Instruction)s using a given [`Model`](crate::Model).
+pub fn generate<M>(instructions: Vec<Instruction>, mut model: M) -> M::Output
+where
+    M: Model,
+{
+    instructions
+        .into_iter()
+        .for_each(|instruction| match instruction {
+            Instruction::Clear { cell } => model.clear(cell),
+            Instruction::Mov { cell, to } => model.mov(cell, to),
+        });
+
+    model.finish()
 }
 
 #[cfg(test)]

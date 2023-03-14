@@ -1,6 +1,10 @@
 # autoperm
 
-autoperm is a tool for generating brainfuck programs that apply [stack effect diagrams](https://en.wikipedia.org/wiki/Stack-oriented_programming#Stack_effect_diagrams). The produced result has the fewest number of _loops_ and it's foundation is [Tarjan's Strongly Connected Components Algorithm](https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm). 
+autoperm is a tool for generating programs that apply [stack effect diagrams](https://en.wikipedia.org/wiki/Stack-oriented_programming#Stack_effect_diagrams). The produced result has the fewest number of `MOV`\* instructions. The algorithm has it's foundations in [Tarjan's Strongly Connected Components](https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm). 
+
+The library is backend agnostic. A [brainfuck](https://en.wikipedia.org/wiki/Brainfuck) backend is provided. Installing the crate as a binary gives access to the `autoperm` command which uses this brainfuck backend.
+
+\* A `MOV` Clears the data at a particular memory address and writes it to a list of other cells
 
 Eventually I will create a proper write up but for now here is my quick [explanation](./explanation.md).
 
@@ -33,8 +37,6 @@ a b c d e f -- c d d f e e b
 <<<<<[-]>[->>>>>+<<<<<]>[-<<+>>]>[-<+<+>>]>>[-<<+>>]<[->>>+<<<]>>>[-<<+<+>>>]<
 
 ```
-
-There are also opportunities to use the project as a library. This is currently **unstable** and is a work in progress.
 
 The program assumes the memory pointer is pointing at the top of the stack. Any new cells should start empty and there must be 1 free cell at the top of the stack for temporary storage.
 
@@ -85,4 +87,3 @@ a b -- a b a b
  0  1  2 *3  T 
  a  b  a  b  0
 ```
-
