@@ -1,3 +1,8 @@
+[![Crates.io](https://img.shields.io/crates/v/autoperm.svg)](https://crates.io/crates/autoperm)
+[![Documentation](https://docs.rs/autoperm/badge.svg)](https://docs.rs/autoperm/)
+[![Codecov](https://codecov.io/github/Alextopher/autoperm/coverage.svg?branch=main)](https://codecov.io/gh/Alextopher/autoperm)
+[![Dependency status](https://deps.rs/repo/github/Alextopher/autoperm/status.svg)](https://deps.rs/repo/github/Alextopher/autoperm)
+
 # autoperm
 
 autoperm is a tool for generating programs that apply [stack effect diagrams](https://en.wikipedia.org/wiki/Stack-oriented_programming#Stack_effect_diagrams). The produced result has the fewest number of `MOV`\* instructions. The algorithm has it's foundations in [Tarjan's Strongly Connected Components](https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm). 
