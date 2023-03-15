@@ -1,7 +1,7 @@
 use bfi::TestResults;
 use quickcheck::TestResult;
 
-use crate::{parse, StackEffectDiagram, generate, solve, models::Brainfuck};
+use crate::{generate, models::Brainfuck, parse, solve, StackEffectDiagram};
 
 fn test_brainfuck(code: &str, inputs: Vec<u8>, outputs: Vec<u8>) -> bool {
     match bfi::test_blocking(code, inputs, outputs, 10000) {
@@ -36,7 +36,10 @@ fn test_brainfuck(code: &str, inputs: Vec<u8>, outputs: Vec<u8>) -> bool {
 
 fn test_stackeffect(effect: &StackEffectDiagram) -> bool {
     if !effect.mapping.is_empty() {
-        assert!(*effect.mapping.iter().max().unwrap() < effect.inputs, "Problem with test creation");
+        assert!(
+            *effect.mapping.iter().max().unwrap() < effect.inputs,
+            "Problem with test creation"
+        );
     }
 
     // Solve the stack effect diagram
