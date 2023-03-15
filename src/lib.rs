@@ -2,47 +2,47 @@
 //!
 //! It is backend agnostic and could be used to generate programs for any language as long
 //! as the language implements the [`Model`](model::Model) trait.
-//! 
+//!
 //! A [brainfuck](https://en.wikipedia.org/wiki/Brainfuck) backend is provided and accessible
 //! with [`autoperm_bf`](crate::autoperm_bf`).
-//! 
+//!
 //! ## Binary
-//! 
+//!
 //! Installing the crate as a binary gives access to the `autoperm` command which uses this brainfuck backend as REPL.
-//! 
+//!
 //! ```test
 //! cargo install autoperm
 //! ```
-//! 
+//!
 //! **Usage:**
-//! 
+//!
 //! ```bf
 //! $ autoperm a b -- b a
 //! [->+<]<[->+<]>>[-<<+>>]<
-//! 
+//!
 //! $ autoperm
 //! a b c -- c a b
 //! [->+<]<[->+<]<[->+<]>>>[-<<<+>>>]<
-//! 
+//!
 //! a -- a a a a
 //! [->>>>+<<<<]>>>>[-<+<+<+<+>>>>]<
-//! 
+//!
 //! a b c d -- d c a b
 //! [->+<]<<[->>+<<]>[-<+>]<<[->>+<<]>>>>[-<<<<+>>>>]<
-//! 
+//!
 //! a b c -- c
 //! <<[-]>[-]>[-<<+>>]<<
-//! 
+//!
 //! a b c d e f -- c d d f e e b
 //! <<<<<[-]>[->>>>>+<<<<<]>[-<<+>>]>[-<+<+>>]>>[-<<+>>]<[->>>+<<<]>>>[-<<+<+>>>]<
-//! 
+//!
 //! ```
-//! 
-//! The program assumes the memory pointer starts by pointing at the top of the stack. 
-//! Any "new" cells (cells that are not defined in the input) should start empty. 
+//!
+//! The program assumes the memory pointer starts by pointing at the top of the stack.
+//! Any "new" cells (cells that are not defined in the input) should start empty.
 //! There must also be 1 free cell at the top of the stack for temporary storage.
-//! 
-//! For example: 
+//!
+//! For example:
 //! ```bf
 //! (a b c -- c)
 //! start must be:
@@ -50,7 +50,7 @@
 //! <<[-]>[-]>[-<<+>>]<<
 //! end:
 //!  *c  0  0  0
-//! 
+//!
 //! (a -- a a a a)
 //! start must be:
 //!   a  0  0  0  0 // note: no 0s are initialized before usage
@@ -58,37 +58,37 @@
 //! end:
 //!   a  a  a *a  0
 //! ```
-//! 
+//!
 //! A walk through for (a b -- a b a b)
-//! 
+//!
 //! ```bf
 //! a b -- a b a b
 //! <[->>>>+<<<<]>>>>[-<<+<<+>>>>]<<<[->>>+<<<]>>>[-<+<<+>>>]<
-//! 
+//!
 //! # the tape
-//!  0 *1  2  3  T 
+//!  0 *1  2  3  T
 //!  a  b  0  0  0
-//! 
+//!
 //! <[->>>>+<<<<]      0 → {T}
-//! *0  1  2  3  T 
+//! *0  1  2  3  T
 //!  0  b  0  0  a
-//! 
+//!
 //! >>>>[-<<+<<+>>>>]  T → {2 0}
-//!  0  1  2  3 *T 
+//!  0  1  2  3 *T
 //!  a  b  a  0  0
-//! 
+//!
 //! <<<[->>>+<<<]      1 → {T}
-//!  0 *1  2  3  T 
+//!  0 *1  2  3  T
 //!  a  0  a  0  b
-//! 
+//!
 //! >>>[-<+<<+>>>]     T → {1 3}
-//!  0  1  2  3 *T 
+//!  0  1  2  3 *T
 //!  a  b  a  b  0
-//! 
-//! < 
-//!  0  1  2 *3  T 
+//!
+//! <
+//!  0  1  2 *3  T
 //!  a  b  a  b  0
-//! ``` 
+//! ```
 #![warn(missing_docs)]
 
 mod model;
@@ -121,7 +121,7 @@ pub fn autoperm_bf(stack_effect: &str) -> Result<String, ParseError> {
 /// This function is backend agnostic and can be used to generate programs for any language.
 ///
 /// See: [`Model`](crate::Model).
-/// 
+///
 /// # Examples
 ///
 /// ```

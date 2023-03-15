@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 /// Represents a stack effect diagram.
-/// 
+///
 /// # Example
 ///
 /// ```

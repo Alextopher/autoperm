@@ -52,8 +52,8 @@ impl Model for Brainfuck {
             self.program += "+";
         }
 
-        self.shift_to(cell);        
-        
+        self.shift_to(cell);
+
         self.program += "]";
     }
 
