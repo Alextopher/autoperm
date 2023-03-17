@@ -16,7 +16,7 @@ pub struct Brainfuck {
 
 impl Brainfuck {
     /// Creates a new model
-    /// 
+    ///
     /// The `ptr` argument is the initial pointer position.
     pub fn new() -> Self {
         Self {

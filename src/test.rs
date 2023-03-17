@@ -18,8 +18,7 @@ fn test_brainfuck(code: &str, inputs: Vec<Vec<u8>>, outputs: Vec<Vec<u8>>) -> bo
             let mut failure = false;
             for (_i, result) in results.iter().enumerate() {
                 match result {
-                    bfi::TestResult::Ok => {
-                    }
+                    bfi::TestResult::Ok => {}
                     bfi::TestResult::RunTimeError(e) => {
                         eprintln!("{:?}", e);
                         failure = true;
@@ -87,11 +86,7 @@ fn test_stackeffect(effect: &StackEffectDiagram) -> bool {
         outputs.push(output);
     }
 
-    test_brainfuck(
-        &bf,
-        inputs,
-        outputs,
-    )
+    test_brainfuck(&bf, inputs, outputs)
 }
 
 /// Checks that the functions used in https://github.com/Alextopher/serotonin stdlib work
