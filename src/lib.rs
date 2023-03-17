@@ -110,7 +110,7 @@ pub use solve::{solve, Instruction};
 ///
 /// let program = autoperm_bf("a b -- b a");
 ///
-/// assert_eq!(program, Ok(">[->+<]<[->+<]>>[-<<+>>]<<".to_string()));
+/// assert_eq!(program, Ok("[->+<]<[->+<]>>[-<<+>>]<".to_string()));
 /// ```
 pub fn autoperm_bf(stack_effect: &str) -> Result<String, ParseError> {
     autoperm(stack_effect, Brainfuck::new())
@@ -131,7 +131,7 @@ pub fn autoperm_bf(stack_effect: &str) -> Result<String, ParseError> {
 /// let model = Brainfuck::new();
 /// let program = autoperm("a b -- b a", model);
 ///
-/// assert_eq!(program, Ok(">[->+<]<[->+<]>>[-<<+>>]<<".to_string()));
+/// assert_eq!(program, Ok("[->+<]<[->+<]>>[-<<+>>]<".to_string()));
 /// ```
 pub fn autoperm<M>(stack_effect: &str, model: M) -> Result<M::Output, ParseError>
 where
@@ -155,6 +155,8 @@ where
         .for_each(|instruction| match instruction {
             Instruction::Clear { cell } => model.clear(cell),
             Instruction::Mov { cell, to } => model.mov(cell, to),
+            Instruction::Start { cell } => model.start(cell),
+            Instruction::Top { cell } => model.top(cell),
         });
 
     model.finish()
