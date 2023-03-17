@@ -4,7 +4,7 @@ pub trait Model {
     type Output;
 
     /// Sets the top of the stack to a given index
-    /// 
+    ///
     /// This function should generate a no-op. It is used just to communicate the starting state
     fn start(&mut self, cell: isize);
     /// Clears a cell to 0

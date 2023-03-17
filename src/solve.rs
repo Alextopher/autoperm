@@ -76,7 +76,9 @@ pub fn solve(diagram: &StackEffectDiagram) -> Vec<Instruction> {
     let tarjan = petgraph::algo::tarjan_scc(&digraph);
     println!("{:?}", tarjan);
 
-    let mut instructions = vec![Instruction::Start { cell: inputs as isize - 1 }];
+    let mut instructions = vec![Instruction::Start {
+        cell: inputs as isize - 1,
+    }];
 
     for component in tarjan {
         if component.len() == 1 {
@@ -90,11 +92,20 @@ pub fn solve(diagram: &StackEffectDiagram) -> Vec<Instruction> {
                 }
             } else if neighbors.contains(&index) {
                 if neighbors.len() > 1 {
-                    instructions.push(Instruction::Mov { cell: index, to: vec![temp] });
-                    instructions.push(Instruction::Mov { cell: temp,  to: neighbors });
+                    instructions.push(Instruction::Mov {
+                        cell: index,
+                        to: vec![temp],
+                    });
+                    instructions.push(Instruction::Mov {
+                        cell: temp,
+                        to: neighbors,
+                    });
                 }
             } else {
-                instructions.push(Instruction::Mov{ cell: index, to: neighbors});
+                instructions.push(Instruction::Mov {
+                    cell: index,
+                    to: neighbors,
+                });
             }
         } else {
             let mut iter = component.into_iter();
@@ -102,18 +113,29 @@ pub fn solve(diagram: &StackEffectDiagram) -> Vec<Instruction> {
             let last_index = iter.next().unwrap();
             let last_neighbors = get_neighbors(&digraph, last_index);
 
-            instructions.push(Instruction::Mov{ cell: last_index.index() as isize, to: vec![temp]} );
+            instructions.push(Instruction::Mov {
+                cell: last_index.index() as isize,
+                to: vec![temp],
+            });
 
             for node in iter {
                 let neighbors = get_neighbors(&digraph, node);
-                instructions.push(Instruction::Mov{ cell: node.index() as isize, to: neighbors });
+                instructions.push(Instruction::Mov {
+                    cell: node.index() as isize,
+                    to: neighbors,
+                });
             }
 
-            instructions.push(Instruction::Mov{ cell: temp, to: last_neighbors});
+            instructions.push(Instruction::Mov {
+                cell: temp,
+                to: last_neighbors,
+            });
         }
     }
 
-    instructions.push(Instruction::Top { cell: mapping.len() as isize - 1 });
+    instructions.push(Instruction::Top {
+        cell: mapping.len() as isize - 1,
+    });
 
     instructions
 }
