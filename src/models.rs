@@ -16,6 +16,8 @@ pub struct Brainfuck {
 
 impl Brainfuck {
     /// Creates a new model
+    /// 
+    /// The `ptr` argument is the initial pointer position.
     pub fn new() -> Self {
         Self {
             program: String::new(),
@@ -34,8 +36,18 @@ impl Brainfuck {
     }
 }
 
+impl Default for Brainfuck {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Model for Brainfuck {
     type Output = String;
+
+    fn start(&mut self, cell: isize) {
+        self.ptr = cell;
+    }
 
     fn clear(&mut self, cell: isize) {
         self.shift_to(cell);
@@ -57,10 +69,11 @@ impl Model for Brainfuck {
         self.program += "]";
     }
 
-    fn finish(mut self) -> Self::Output {
-        // Apply the final shift back to the start
-        self.shift_to(0);
+    fn top(&mut self, cell: isize) {
+        self.shift_to(cell);
+    }
 
+    fn finish(self) -> Self::Output {
         self.program
     }
 }
