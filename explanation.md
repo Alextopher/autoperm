@@ -53,7 +53,7 @@ SWAP = \begin{pmatrix}
 
 Two-line notation isn't the only choice of notation, [Cycle notation](https://en.wikipedia.org/wiki/Permutation#Cycle_notation) is another common choice. In cycle notation, a permutation is expressed as a product of cycles. A cycle is a sequence of elements that are permuted cyclically, meaning that the first element is moved to the second position, the second to the third position, and so on, until the last element is moved to the first position.
 
-In our example, the permutation `SWAP` is expressed as `$$(a b)$$` in cycle notation. A larger example, `SWAP2 (a b c d -- c d a b)` is `$$(a c)(b d)$$`.
+In our example, the permutation `SWAP` is expressed as $$(a b)$$ in cycle notation. A larger example, `SWAP2 (a b c d -- c d a b)` is $$(a c)(b d)$$.
 
 Cycles have 2 very useful properties. Every cycle is disjoint (no element appears in more than one cycle) and the product of cycles are commutative (cycles can be applied in any order). Together, using those two properties we can reduce the problem of "permutate this stack" to "execute these cycles individually". The latter is much easier, In fact I already outline the algorithm earlier.
 
@@ -138,11 +138,11 @@ We can analyze the properties of this graph to gain some insight. Firstly, it's 
 
 ### Each component of the graph has at most 1 cycle
 
-Proof: Let's suppose there are two cycles in a component, which we will call A and B. Let the vertices of A be `$$a_1, a_2, ... a_n$$` and those of B be `$$b_1, b_2, ... b_m$$`, such that `$$a_i -> a_(i + 1 \mod n)$$` and `$$b_i <> b_(i + 1 \mod m)$$`. Since these two cycles belong to the same component, there must be a path connecting them. Denote this path as `$$P$$`, and without loss of generality, let it extend from A to B. We can express `$$P$$` as `$$a_i, p_1, ... p_k, b_j$$`. `$$b_j$$` now has an in-degree of 2: one from p_k and the other from `$$b_(j - 1 \mod m)$$`. This contradicts our earlier observation that every vertex must have an in-degree of 0 or 1.
+Proof: Let's suppose there are two cycles in a component, which we will call A and B. Let the vertices of A be $$a_1, a_2, ... a_n$$ and those of B be $$b_1, b_2, ... b_m$$, such that $$a_i -> a_(i + 1 \mod n)$$ and $$b_i <> b_(i + 1 \mod m)$$. Since these two cycles belong to the same component, there must be a path connecting them. Denote this path as $$P$$, and without loss of generality, let it extend from A to B. We can express $$P$$ as $$a_i, p_1, ... p_k, b_j$$. $$b_j$$ now has an in-degree of 2: one from p_k and the other from $$b_(j - 1 \mod m)$$. This contradicts our earlier observation that every vertex must have an in-degree of 0 or 1.
 
 ### Cycles are the roots of their components
 
-This theorem is a more general result that uses similar reasoning as the previous proof. Suppose, contrary to the theorem, that we have a component consisting of a directed acyclic graph (DAG) rooted at `$$R$$` with a cycle `$$C$$` attached to it (with vertices `$$c_i$$` connecting to `$$c_(i + 1 \mod n)$$`) attached to it at a location other than R. Since `$$C$$` and R are weakly connected, and `$$R$$` is the root of the component, there must be a path from `$$R$$` to `$$C$$`. Denote this path as `$$P$$`. We can express `$$P$$` as `$$R, p_1, ... p_k, c_i$$`. `$$c_i$$` now has an in-degree of 2: one from `$$p_k$$` and the other from `$$c_(i - 1 \mod n)$$`. This again contradicts our earlier observation that every vertex must have an in-degree of 0 or 1.
+This theorem is a more general result that uses similar reasoning as the previous proof. Suppose, contrary to the theorem, that we have a component consisting of a directed acyclic graph (DAG) rooted at $$R$$ with a cycle $$C$$ attached to it (with vertices $$c_i$$ connecting to $$c_(i + 1 \mod n)$$) attached to it at a location other than R. Since $$C$$ and R are weakly connected, and $$R$$ is the root of the component, there must be a path from $$R$$ to $$C$$. Denote this path as $$P$$. We can express $$P$$ as $$R, p_1, ... p_k, c_i$$. $$c_i$$ now has an in-degree of 2: one from $$p_k$$ and the other from $$c_(i - 1 \mod n)$$. This again contradicts our earlier observation that every vertex must have an in-degree of 0 or 1.
 
 A topological sort could tell us useful information about the order operations must be made. For example if we ignore the `(4->4)` edge and focus on the `{3, 4, 5}` component we would have topological sort `[4, 3, 5]`. This means we must move 5 then we can move 3 then we can move 4.
 
