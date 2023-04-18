@@ -11,7 +11,7 @@ The library is backend agnostic. A [brainfuck](https://en.wikipedia.org/wiki/Bra
 
 \* A `MOV` Clears the data at a particular memory address and writes it to a list of other cells
 
-Eventually I will create a proper write up but for now here is my quick [explanation](./explanation.md).
+Checkout the [explanation](./explanation.md)!
 
 ## Install
 
