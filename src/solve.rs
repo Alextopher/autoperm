@@ -74,7 +74,6 @@ pub fn solve(diagram: &StackEffectDiagram) -> Vec<Instruction> {
 
     // Reversing the ouput of tarjan's strongly connected components creates the program
     let tarjan = petgraph::algo::tarjan_scc(&digraph);
-    println!("{:?}", tarjan);
 
     let mut instructions = vec![Instruction::Start {
         cell: inputs as isize - 1,

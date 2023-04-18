@@ -73,7 +73,7 @@ fn test_stackeffect(effect: &StackEffectDiagram) -> bool {
         let mut output = effect
             .mapping
             .iter()
-            .map(|&i| input[i as usize])
+            .map(|&i| input[i])
             .rev()
             .collect::<Vec<_>>();
 
