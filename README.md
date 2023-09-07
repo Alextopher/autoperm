@@ -1,6 +1,5 @@
 [![Crates.io](https://img.shields.io/crates/v/autoperm.svg)](https://crates.io/crates/autoperm)
 [![Documentation](https://docs.rs/autoperm/badge.svg)](https://docs.rs/autoperm/)
-[![Codecov](https://codecov.io/github/Alextopher/autoperm/coverage.svg?branch=main)](https://codecov.io/gh/Alextopher/autoperm)
 [![Dependency status](https://deps.rs/repo/github/Alextopher/autoperm/status.svg)](https://deps.rs/repo/github/Alextopher/autoperm)
 
 # autoperm
