@@ -36,11 +36,11 @@ Those ASCII diagrams describing stack effects are nice, but unwieldy. The first 
 
 Stack effect diagrams are very straightforward, you write the stack before the operation followed by the stack after[^]. Stacks effects are written bottom to top. For example, `DUP` can be written `(a -- a a)` and `SWAP` `(a b -- b a)`.
 
-The goal of `autoperm` is to translate a stack effect diagram into a brainfuck program that preforms that operation on the tape.More generally `autoperm` might also find usage in another project by providing performant algorithms in languages like Joy or FORTH.
+The goal of `autoperm` is to translate a stack effect diagram into a brainfuck program that preforms that operation on the tape. More generally `autoperm` might also find usage in another project by providing performant algorithms in languages like Joy or FORTH.
 
 ## An algorithm for permutations
 
-At the beginning of this project I wasn't confident what the algorithm would look like. Rather than solving the entire problem at once I noticed is that there is a category of stack effects that are _permutations_. That is, the only the order of the elements on the stack is changed and no elements are added or removed. `SWAP` is one such permutation, while `DUP` is not. Permutations are fairly well understood concepts in group theory.
+At the beginning of this project I wasn't confident what the algorithm would look like. Rather than solving the entire problem at once I looked into an easier problem. I noticed there is a category of stack effects that are _permutations_. That is, the only the order of the elements on the stack is changed, but no elements are added or removed. `SWAP` is one such permutation, while `DUP` is not. Permutations are fairly well understood concepts in group theory.
 
 I noticed that a stack effect diagram of a permutation is actually it's [Two-line notation](https://en.wikipedia.org/wiki/Permutation#Two-line_notation)
 
@@ -81,19 +81,19 @@ MOV 0 1
 MOV 2 0
 ```
 
-In brainfuck the `MOV` instruction is very simple. Assume the current cell pointer is 0, then `MOV 0 X` is `[>x+<x-]`, Or shift left X times, increment, shift right X times, decrement. `MOV A B` is similar, we can rewrite it as `SHIFT A` (move right A), `MOV 0 B-A`, `SHIFT -A` (reverse the first step). Generally book keeping the cell pointer is a bit tedious, but not too difficult. `MOV` extends well to writing to a set of cells for example `MOV 0 {1 2 3} : [>+>+>+<<<-]`. This extended `MOV` will be useful later.
+In brainfuck the `MOV` instruction is very simple. Assume the current cell pointer is 0, then `MOV 0 X` is `[>x+<x-]`, Or shift left X times, increment, shift right X times, decrement. `MOV A B` is similar, we can rewrite it as `SHIFT A` (move right A), `MOV 0 B-A`, `SHIFT -A` (reverse the first step). Book keeping the cell pointer is a bit tedious, but not too difficult. `MOV` extends well to writing to a set of cells for example `MOV 0 {1 2 3} : [>+>+>+<<<-]`. This extended `MOV` will be useful later.
 
-Finally we have an outline for the permutation algorithm is:
+Finally, we have a full outline for the permutation algorithm:
 
 - Translate stack element names into numeric indexes (a b -- b a ==> 0 1 -- 1 0).
 - Translate the stack effect into Two-line notation (`Map<usize, usize>`)
-- Covert two-line notation into cycle notation (`Vec<Vec<usize>>`)
+- Translate from two-line notation into cycle notation (`Vec<Vec<usize>>`)
 - Generate "MOV" instructions
-- Convert to brainfuck
+- Rewrite as brainfuck
 
 ## A stronger algorithm
 
-Unfortunately, most functions are not simple permutations. I struggled for a long time to tweak the permutation algorithm to work on any function. In a permutation repeated elements are not allowed (`(0 0)` is not a valid cycle), so there is no obvious way to represent something like `DUP: 0 -- 0 0`. One train of thought brought me to thinking of grouping indices into sets, so such that the set of "sets of indices" are disjoint. In the `DUP` case that could have looked like `({0} {0 1})`, which could generate something like `MOV 0 T; MOV T {0 1}` (which is valid BF, more on that later).
+Unfortunately, most functions are not simple permutations. I struggled for a long time to tweak the permutation algorithm to work on any function. In a permutation repeated elements are not allowed (`(0 0)` is not a valid cycle), so there is no obvious way to represent something like `DUP: 0 -- 0 0`. One train of thought brought me to thinking of grouping indices into sets, so such that the set of "sets of indices" are disjoint. In the `DUP` case that could have looked like `({0} {0 1})`, which could generate something like `MOV 0 T; MOV T {0 1}`.
 
 This works for a few new functions but doesn't move the needle very far. We can now write `TUCK: (a b -- b a b)`
 
@@ -104,7 +104,7 @@ MOV 1 {0 2}
 MOV T 1
 ```
 
-But this won't work for more exotic functions. The trouble is if we need more sets in our cycles, how do we handle `({0 1} {2 3})`, what does that even mean, I'm not sure. Instead of trying to force through this problem I started thinking about different ways to represent the problem. That's when I considered the idea of using a directed graph. Graphs are very powerful tools for representing relationships, and they come with existing algorithms for solving a plethora of problems.
+I couldn't make this won't work for more exotic functions. The trouble is if we need more sets in our cycles, how do we handle `({0 1} {2 3})`, what does that even mean, I'm not sure. Instead of trying to force through this problem I started thinking about different representations, elementary group theory doesn't seem strong enough. This is when I considered the idea of using a directed graph. Graphs are very powerful tools for representing relationships, and they come with existing algorithms for solving a plethora of problems.
 
 We draw edges representing the movement of data between indices. For example:
 
@@ -134,7 +134,9 @@ Let's look at a more complicated example, `a b c d e f g -- c b a e e d` or `0 1
 
 ![COMPLICATED graph](./img/complicated.svg)
 
-We can analyze the properties of this graph to gain some insight. Firstly, it's trivial to understand that we can handle all weakly connected components separately. We can focus on each component independently. Secondly, we can observe that every vertex must have an in-degree of 0 or 1. This is because each node is either dropped (like vertex 6) or has a single source node. This observation leads to some important theorems.
+We can analyze the properties of this graph to gain some insight. Firstly, it's trivial to understand that we can handle all weakly connected components separately, they are independent after all. 
+
+Secondly, we can observe that every vertex must have an in-degree of 0 or 1. This is because each node is either dropped (like vertex 6) or has a single source node. If an element had 2 incoming nodes, that would be reminisant to a data race, one of the nice things we don't have to deal with in BF. This observation leads to two important theorems.
 
 ### Each component of the graph has at most 1 cycle
 
@@ -144,17 +146,17 @@ Proof: Let's suppose there are two cycles in a component, which we will call A a
 
 This theorem is a more general result that uses similar reasoning as the previous proof. Suppose, contrary to the theorem, that we have a component consisting of a directed acyclic graph (DAG) rooted at $R$ with a cycle $C$ attached to it, with vertices $c_i \rightarrow c_{(i + 1\mod n)}$, attached to it at a location other than $R$. Since $C$ and $R$ are weakly connected, and $R$ is the root of the component, there must be a path from $R$ to $C$. Denote this path as $P$. We can express $P$ as $R, p_1, ... p_k, c_i$. $c_i$ now has an in-degree of 2: one from $p_k$ and the other from $c_{(i - 1\mod n)}$. This again contradicts our earlier observation that every vertex must have an in-degree of 0 or 1.
 
-### Algorithm
+### The Algorithm
 
 A topological sort could tell us useful information about the order operations must be made. For example if we ignore the `(4->4)` edge and focus on the `{3, 4, 5}` component we would have topological sort `[4, 3, 5]`. This means we must move 5 then we can move 3 then we can move 4.
 
-The problem is we cannot topologically sort a graph with a cycle. I was going to come up with some complicated cutting algorithm where you cut out the cycle and then continue the topological sort but I found something much better. <https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm>
+The problem is I was always taught **you cannot topologically sort a graph with a cycle**. I was going to come up with some complicated cutting algorithm where you cut out the cycle and then continue the topological sort but I stumbled upon something much better. <https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm>
 
 Donald Knuth wrote about Tarjan's algorithm:
 
-> The data structures that he devised for this problem fit together in an amazingly beautiful way, so that the quantities you need to look at while exploring a directed graph are always magically at your fingertips. And his algorithm also does topological sorting as a byproduct.
+> The data structures that he devised for this problem fit together in an amazingly beautiful way, so that the quantities you need to look at while exploring a directed graph are always magically at your fingertips. And his algorithm **also does topological sorting as a byproduct**.
 
-The result of Tarjan SCC on the graph is: `[ [2, 0], [1], [5], [3], [4] [6] ]`. The out edges of each node derives the MOVs and the ordering gives the instruction order. Cycles are handles as they were in the permutation algorithm. We, however, need some extra logic to handle order 1 cycles and drop nodes with outdegree 0.
+The result of Tarjan SCC on the graph is: `[ [2, 0], [1], [5], [3], [4], [6] ]`. The out edges of each node derives the MOVs and the ordering gives the instruction order. Cycles are handles as they were in the permutation algorithm. We, however, need some extra logic to handle order 1 cycles and drop nodes with outdegree 0.
 
 So the final result is:
 
@@ -164,13 +166,13 @@ MOV 0 -> {T}
 MOV 2 -> {0}
 MOV T -> {2}
 [1] | (1 -> 1)
-// order 1 loops are ignored
+// this cell is fixed
 [5] | (No edges)
 CLEAR 5
 [3] | (3 -> 5)
 MOV 3 -> {5}
 [4] | (4 -> 3, 4 -> 4)
-MOV 4 -> T
+MOV 4 -> {T}
 MOV T -> {3, 4}
 [6] | (No edges)
 CLEAR 6
@@ -178,4 +180,4 @@ CLEAR 6
 
 ## Conclusion
 
-I hope this explanation has explained the algorithm well. The permutation based approach was very nice but it was too difficult to scale up. By changing the representation to a graph we were able to more precisely describe the properties of our system. This allowed us to reduce our problem into a well known algorithm.
+I hope this explanation has explained the algorithm well. The permutation based approach was very nice but it was too difficult to scale up. By changing the representation to a graph I was able to more precisely describe the properties of our system. This allowed us to reduce our problem into a well known algorithm.
