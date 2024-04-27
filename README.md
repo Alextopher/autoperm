@@ -56,7 +56,7 @@ end:
 
 (a -- a a a a)
 start must be:
-  a  0  0  0  0 // note: no 0s are initialized before usage
+ *a  0  0  0  0 // note: no 0s are initialized before usage
 [->>>>+<<<<]>>>>[-<+<+<+<+>>>>]<
 end:
   a  a  a *a  0
