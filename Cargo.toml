@@ -9,7 +9,7 @@ keywords = ["brainfuck"]
 
 [dependencies]
 itertools = "0.13"
-petgraph = "0.6"
+petgraph = "0.7"
 
 [dev-dependencies]
 bfi = { git = "https://github.com/Alextopher/bfi.git", branch = "main" }
