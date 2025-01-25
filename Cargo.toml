@@ -8,8 +8,8 @@ repository = "https://github.com/Alextopher/autoperm"
 keywords = ["brainfuck"]
 
 [dependencies]
-itertools = "0.14"
-petgraph = "0.6"
+itertools = "0.13"
+petgraph = "0.7"
 
 [dev-dependencies]
 bfi = { git = "https://github.com/Alextopher/bfi.git", branch = "main" }
