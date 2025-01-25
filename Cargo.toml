@@ -8,7 +8,7 @@ repository = "https://github.com/Alextopher/autoperm"
 keywords = ["brainfuck"]
 
 [dependencies]
-itertools = "0.13"
+itertools = "0.14"
 petgraph = "0.6"
 
 [dev-dependencies]
